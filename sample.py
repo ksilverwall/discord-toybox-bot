@@ -16,8 +16,10 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-scope = ['https://www.googleapis.com/auth/spreadsheets', 
-         'https://www.googleapis.com/auth/drive']
+scope = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
 
 
 class Subcommand(enum.Enum):
@@ -26,7 +28,8 @@ class Subcommand(enum.Enum):
 
 
 def load_prompts():
-    creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        'credentials.json', scope)
     client = gspread.authorize(creds)
 
     spreadsheet = client.open_by_key(sheet_key)
@@ -45,7 +48,7 @@ def load_prompts():
             'prompt': t,
             'post_by': f,
         })
-    
+
     return buffer
 
 
@@ -71,7 +74,7 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    
+
     words = message.content.split(' ')
     if words[0] == '/toybox':
         await process_toybox(message, words[1:])
