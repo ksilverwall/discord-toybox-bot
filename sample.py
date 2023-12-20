@@ -3,6 +3,7 @@ import os
 import random
 import discord
 import gspread
+import enum
 from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -17,6 +18,11 @@ client = discord.Client(intents=intents)
 
 scope = ['https://www.googleapis.com/auth/spreadsheets', 
          'https://www.googleapis.com/auth/drive']
+
+
+class Subcommand(enum.Enum):
+    HELP = 'help'
+    OGIRI = 'ogiri'
 
 
 def load_prompts():
@@ -44,10 +50,16 @@ def load_prompts():
 
 
 async def process_toybox(message, words):
-    prompts = load_prompts()
-    p = random.choice(prompts)
+    if len(words) == 0 or words[0] == Subcommand.HELP.value:
+        await message.channel.send(f"コマンド:" + ','.join([member.value for member in Subcommand]))
+        return
 
-    await message.channel.send(f"お題: {p['prompt']}(by{p['post_by']})")
+    print(words)
+
+    if words[0] == Subcommand.OGIRI.value:
+        prompts = load_prompts()
+        p = random.choice(prompts)
+        await message.channel.send(f"お題: {p['prompt']}(by{p['post_by']})")
 
 
 @client.event
