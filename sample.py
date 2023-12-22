@@ -1,9 +1,10 @@
 import os
 
+import enum
 import random
+
 import discord
 import gspread
-import enum
 from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -14,7 +15,7 @@ sheet_key = os.getenv('SHEET_KEY')
 intents = discord.Intents.default()
 intents.message_content = True
 
-client = discord.Client(intents=intents)
+discord_client = discord.Client(intents=intents)
 
 scope = [
     'https://www.googleapis.com/auth/spreadsheets',
@@ -54,7 +55,7 @@ def load_prompts():
 
 async def process_toybox(message, words):
     if len(words) == 0 or words[0] == Subcommand.HELP.value:
-        await message.channel.send(f"コマンド:" + ','.join([member.value for member in Subcommand]))
+        await message.channel.send("コマンド:" + ','.join([member.value for member in Subcommand]))
         return
 
     print(words)
@@ -65,14 +66,14 @@ async def process_toybox(message, words):
         await message.channel.send(f"お題: {p['prompt']}(by{p['post_by']})")
 
 
-@client.event
+@discord_client.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f'We have logged in as {discord_client.user}')
 
 
-@client.event
+@discord_client.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == discord_client.user:
         return
 
     words = message.content.split(' ')
@@ -80,4 +81,4 @@ async def on_message(message):
         await process_toybox(message, words[1:])
 
 
-client.run(token)
+discord_client.run(token)
