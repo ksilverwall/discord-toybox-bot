@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "discord_toybox_task" {
   container_definitions = jsonencode([
     {
       name  = "discord_toybox_bot",
-      image = "nginx:latest",
+      image = "${aws_ecr_repository.discord_toybox.repository_url}:latest",
       cpu   = 256,
       memory = 512,
       essential = true,
