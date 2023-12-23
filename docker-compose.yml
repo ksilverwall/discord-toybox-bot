@@ -9,3 +9,9 @@ services:
       - .:/usr/src/app
     working_dir: /usr/src/app
     command: ["pylint", "*.py"]
+
+  terraform:
+    image: hashicorp/terraform:latest
+    working_dir: /terraform
+    volumes:
+      - ./terraform:/terraform
