@@ -19,6 +19,29 @@ resource "aws_iam_role" "discord_toybox_role" {
   })
 }
 
+resource "aws_iam_role_policy" "ecs_task_execution_policy" {
+  name   = "ecs_task_execution_policy"
+  role   = aws_iam_role.discord_toybox_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 resource "aws_ecs_task_definition" "discord_toybox_task" {
   family                   = "discord-toybox-task"
   network_mode             = "awsvpc"
@@ -54,6 +77,7 @@ resource "aws_ecs_service" "discord_toybox_service" {
   network_configuration {
     subnets = [aws_subnet.discord_toybox_1.id, aws_subnet.discord_toybox_2.id]
     security_groups = [aws_security_group.discord_toybox_sg.id]
+    assign_public_ip = true
   }
 
   load_balancer {

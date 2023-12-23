@@ -25,9 +25,38 @@ resource "aws_subnet" "discord_toybox_2" {
   }
 }
 
+#
+# Internet Gateway
+#
 resource "aws_internet_gateway" "discord_toybox_igw" {
   vpc_id = aws_vpc.discord_toybox.id
   tags = {
     Name = "discord-toybox-igw"
   }
+}
+
+#
+# Route Table
+#
+resource "aws_route_table" "discord_toybox_rt" {
+  vpc_id = aws_vpc.discord_toybox.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.discord_toybox_igw.id
+  }
+
+  tags = {
+    Name = "discord-toybox-rt"
+  }
+}
+
+resource "aws_route_table_association" "discord_toybox_rta_1" {
+  subnet_id      = aws_subnet.discord_toybox_1.id
+  route_table_id = aws_route_table.discord_toybox_rt.id
+}
+
+resource "aws_route_table_association" "discord_toybox_rta_2" {
+  subnet_id      = aws_subnet.discord_toybox_2.id
+  route_table_id = aws_route_table.discord_toybox_rt.id
 }
