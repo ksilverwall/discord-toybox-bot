@@ -86,7 +86,7 @@ resource "aws_ecs_service" "discord_toybox_service" {
     container_port   = 80
   }
 
-  desired_count = 1
+  desired_count = 0
 
   deployment_controller {
     type = "ECS"
