@@ -1,12 +1,13 @@
 import os
 
-import enum
 import random
 
 import discord
 import gspread
+from discord.ext import commands
 from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
+
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -15,17 +16,12 @@ sheet_key = os.getenv('SHEET_KEY')
 intents = discord.Intents.default()
 intents.message_content = True
 
-discord_client = discord.Client(intents=intents)
+discord_client = commands.Bot(command_prefix='/toybox ', intents=intents)
 
 scope = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ]
-
-
-class Subcommand(enum.Enum):
-    HELP = 'help'
-    OGIRI = 'ogiri'
 
 
 def load_prompts():
@@ -53,32 +49,16 @@ def load_prompts():
     return buffer
 
 
-async def process_toybox(message, words):
-    if len(words) == 0 or words[0] == Subcommand.HELP.value:
-        await message.channel.send("コマンド:" + ','.join([member.value for member in Subcommand]))
-        return
-
-    print(words)
-
-    if words[0] == Subcommand.OGIRI.value:
-        prompts = load_prompts()
-        p = random.choice(prompts)
-        await message.channel.send(f"お題: {p['prompt']}(by{p['post_by']})")
-
-
 @discord_client.event
 async def on_ready():
     print(f'We have logged in as {discord_client.user}')
 
 
-@discord_client.event
-async def on_message(message):
-    if message.author == discord_client.user:
-        return
-
-    words = message.content.split(' ')
-    if words[0] == '/toybox':
-        await process_toybox(message, words[1:])
+@discord_client.command()
+async def ogiri(ctx):
+    prompts = load_prompts()
+    p = random.choice(prompts)
+    await ctx.send(f"お題: {p['prompt']}(by{p['post_by']})")
 
 
 discord_client.run(token)
