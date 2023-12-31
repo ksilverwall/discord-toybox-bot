@@ -20,6 +20,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    environment:
+      - SECRETS_ENVIRONMENT=${SECRETS_ENVIRONMENT}
     volumes:
       - .:/usr/src/app
     working_dir: /usr/src/app

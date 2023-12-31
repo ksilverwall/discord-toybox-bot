@@ -1,18 +1,24 @@
 import os
 
+import json
 import random
 
 import discord
 import gspread
 from discord.ext import commands
 from discord.ui import Button, View
-from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-load_dotenv()
-token = os.getenv('DISCORD_TOKEN')
-sheet_key = os.getenv('SHEET_KEY')
+secrets = {}
+try:
+    secrets = json.loads(os.getenv('SECRETS_ENVIRONMENT'))
+except json.JSONDecodeError:
+    print(f"Failed to load SECRETS_ENVIRONMENT {os.getenv('SECRETS_ENVIRONMENT')}")
+    exit(-1)
+
+token = secrets.get("DISCORD_TOKEN")
+sheet_key = secrets.get('SHEET_KEY')
 
 intents = discord.Intents.default()
 intents.message_content = True
