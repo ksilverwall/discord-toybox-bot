@@ -1,3 +1,8 @@
+resource "aws_cloudwatch_log_group" "discord_toyboy_log" {
+  name = "/ecs/discord-toybox"
+  retention_in_days = 30
+}
+
 resource "aws_secretsmanager_secret" "discord_toybox_secrets" {
   name = "discord-toybox-secrets"
 }
@@ -74,7 +79,15 @@ resource "aws_ecs_task_definition" "discord_toybox_task" {
           containerPort = 80,
           hostPort      = 80
         }
-      ]
+      ],
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.discord_toyboy_log.name
+          awslogs-region        = "ap-northeast-1"
+          awslogs-stream-prefix = "ecs"
+        }
+      },
       secrets = [
         {
           name      = "SECRETS_ENVIRONMENT",
