@@ -11,7 +11,6 @@ scope = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ]
-member_buffer = []
 
 
 def load_prompts(sheet_key: str):
@@ -43,6 +42,7 @@ class ToyBoxCog(commands.Cog):
     def __init__(self, bot, sheet_key: str):
         self.bot = bot
         self.sheet_key = sheet_key
+        self.member_buffer = []
 
     @commands.command()
     async def ogiri(self, ctx):
@@ -53,19 +53,20 @@ class ToyBoxCog(commands.Cog):
     @commands.command()
     async def insider(self, ctx):
         view = View()
+        self.member_buffer = []
 
         async def button_callback(interaction: discord.Interaction):
-            member_buffer.append(interaction.user)
-            member_names = [m.global_name for m in member_buffer]
+            self.member_buffer.append(interaction.user)
+            member_names = [m.global_name for m in self.member_buffer]
             message = f"{interaction.user.global_name}が参加！ 現在：{member_names}"
             await interaction.response.send_message(message)
 
         async def on_submit(interaction: discord.Interaction):
-            if len(member_buffer) < 3:
+            if len(self.member_buffer) < 3:
                 await interaction.response.send_message("十分な数の参加者が居ません")
                 return
 
-            shuffled = member_buffer[:]
+            shuffled = self.member_buffer[:]
             random.shuffle(shuffled)
 
             master = shuffled[0]
@@ -85,5 +86,5 @@ class ToyBoxCog(commands.Cog):
         view.add_item(entry_button)
         view.add_item(submit_button)
 
-        member_names = [m.global_name for m in member_buffer]
+        member_names = [m.global_name for m in self.member_buffer]
         await ctx.send(f'インサイダー・ゲームを始めます:({member_names})', view=view)
