@@ -5,6 +5,7 @@ import random
 import discord
 import gspread
 from discord.ext import commands
+from discord.ui import Button, View
 from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -59,6 +60,46 @@ async def ogiri(ctx):
     prompts = load_prompts()
     p = random.choice(prompts)
     await ctx.send(f"お題: {p['prompt']}(by{p['post_by']})")
+
+
+member_buffer = []
+
+@discord_client.command()
+async def insider(ctx):
+    view = View()
+
+    async def button_callback(interaction: discord.Interaction):
+        member_buffer.append(interaction.user)
+        member_names = [m.global_name for m in member_buffer]
+        message = f"{interaction.user.global_name}が参加！ 現在：{member_names}"
+        await interaction.response.send_message(message)
+
+    async def on_submit(interaction: discord.Interaction):
+        if len(member_buffer) < 3:
+            await interaction.response.send_message("十分な数の参加者が居ません")
+
+        shuffled = member_buffer[:]
+        random.shuffle(shuffled)
+
+        master = shuffled[0]
+        insider_user = shuffled[1]
+
+        await master.send("インサイダー・ゲーム：あなたがマスターです")
+        await insider_user.send("インサイダー・ゲーム：あなたがインサイダーです")
+        for u in shuffled[2:]:
+            await u.send("インサイダー・ゲーム：あなたは市民です")
+
+        await interaction.response.send_message("ロールを配布しました")
+
+    entry_button = Button(label="参加", style=discord.ButtonStyle.primary)
+    entry_button.callback = button_callback
+    submit_button = Button(label="締切", style=discord.ButtonStyle.primary)
+    submit_button.callback = on_submit
+    view.add_item(entry_button)
+    view.add_item(submit_button)
+
+    member_names = [m.global_name for m in member_buffer]
+    await ctx.send(f'インサイダー・ゲームを始めます:({member_names})', view=view)
 
 
 discord_client.run(token)
