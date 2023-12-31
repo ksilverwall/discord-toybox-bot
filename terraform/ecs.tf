@@ -1,3 +1,7 @@
+resource "aws_secretsmanager_secret" "discord_toybox_secrets" {
+  name = "discord-toybox-secrets"
+}
+
 resource "aws_ecs_cluster" "discord_toybox_bot" {
   name = "discord-toybox-bot"
 }
@@ -37,6 +41,13 @@ resource "aws_iam_role_policy" "ecs_task_execution_policy" {
           "logs:PutLogEvents"
         ],
         Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ],
+        Resource = aws_secretsmanager_secret.discord_toybox_secrets.arn
       }
     ]
   })
@@ -62,6 +73,12 @@ resource "aws_ecs_task_definition" "discord_toybox_task" {
         {
           containerPort = 80,
           hostPort      = 80
+        }
+      ]
+      secrets = [
+        {
+          name      = "SECRETS_ENVIRONMENT",
+          valueFrom = aws_secretsmanager_secret.discord_toybox_secrets.arn
         }
       ]
     }
