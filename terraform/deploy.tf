@@ -1,3 +1,7 @@
+variable "OIDC_ARN" {
+  type = string
+}
+
 resource "aws_iam_policy" "ecr_deploy_policy" {
   name        = "ecr-deploy-policy"
   description = "A policy that allows GitHub Actions to push to ECR"
@@ -29,9 +33,14 @@ resource "aws_iam_role" "github_actions_role" {
       {
         Effect = "Allow",
         Principal = {
-          Service = "ecs-tasks.amazonaws.com"
+          Federated = var.OIDC_ARN
         },
-        Action = "sts:AssumeRole"
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringLike = {
+            "token.actions.githubusercontent.com:sub": "repo:ksilverwall/discord-toybox-bot:*"
+          }
+        }
       }
     ]
   })
