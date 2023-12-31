@@ -1,4 +1,5 @@
 import os
+import sys
 
 import json
 import random
@@ -15,7 +16,7 @@ try:
     secrets = json.loads(os.getenv('SECRETS_ENVIRONMENT'))
 except json.JSONDecodeError:
     print(f"Failed to load SECRETS_ENVIRONMENT {os.getenv('SECRETS_ENVIRONMENT')}")
-    exit(-1)
+    sys.exit(-1)
 
 token = secrets.get("DISCORD_TOKEN")
 sheet_key = secrets.get('SHEET_KEY')
